@@ -144,12 +144,12 @@ class AgentMinimax(Agent):
             return (curr_min, min_op)
     
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
-        max_depth = env.num_steps//2
+        max_depth = env.num_steps
         depth = 1
         start_time = time.time()
         operation = None
         while ( (time.time() - start_time) > time_offset ) and (depth <= max_depth):
-            result = self.compute_next_operation(env,agent_id,(time.time() - start_time), AgentTurn.MAX, depth, operation )
+            result = self.compute_next_operation(env,agent_id, (time_limit - (time.time() - start_time)), AgentTurn.MAX, depth, operation )
             if result != (None,None):
                 operation = result[1]
             depth += 1
