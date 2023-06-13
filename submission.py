@@ -115,6 +115,8 @@ class AgentMinimax(Agent):
         
         if (env.num_steps == 0) or (depth == 0): # game ends when we run out of steps
             dest_value = self.heuristic(env,agent_id)
+            if turn == AgentTurn.MIN:
+                dest_value *= (-1)
             return (operation,dest_value) 
         
         operators = env.get_legal_operators(agent_id)
