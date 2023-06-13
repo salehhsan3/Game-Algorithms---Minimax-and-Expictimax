@@ -134,7 +134,7 @@ class AgentMinimax(Agent):
                     curr_max = result[0]
                     max_op = op 
             return (curr_max, max_op)
-        else:
+        else: # turn == AgentTurn.MIN
             curr_min = np.inf
             min_op = None
             for environment, op in zip(children, operators):
@@ -151,7 +151,7 @@ class AgentMinimax(Agent):
         start_time = time.time()
         operation = None
         while ( (time.time() - start_time) > time_offset ) and (depth <= max_depth):
-            result = self.compute_next_operation(env,agent_id, (time_limit - (time.time() - start_time)), AgentTurn.MAX, depth, operation )
+            result = self.compute_next_operation(env,agent_id, (time_limit - (time.time() - start_time)), AgentTurn.MAX, depth )
             if result != (None,None):
                 operation = result[1]
             depth += 1
