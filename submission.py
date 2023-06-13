@@ -97,19 +97,6 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
             else:
                 adv_value = 0.75*2*adv_add_credit - 0.25*adv_pack_dist
     return (agent_value - adv_value)
-            
-            
-            
-        
-        
-        
-        
-        
-            
-            
-            
-            
-        
 
 
 class AgentGreedyImproved(AgentGreedy):
@@ -122,13 +109,11 @@ class AgentMinimax(Agent):
     def compute_next_operation(self, env: WarehouseEnv, agent_id, time_limit, turn: AgentTurn, depth, operation = None):
         start_time = time.time()
         agent = env.get_robot(agent_id)
-        agent_pos = agent.position
-        agent_package = agent.package
         
         if time_limit <= time_offset:
             return (None,None)
         
-        if (agent_package != None and agent_pos == agent_package.destination) or (depth == 0):
+        if (env.num_steps == 0) or (depth == 0): # game ends when we run out of steps
             dest_value = self.heuristic(env,agent_id)
             return (operation,dest_value) 
         
@@ -142,27 +127,31 @@ class AgentMinimax(Agent):
             max_op = None
             for environment, op in zip(children, operators):
                 time_left = time_limit - (start_time - time.time())
-                result = self.compute_next_operation(environment,agent_id,time_left, AgentTurn.MIN, depth-1, op )
-            if result[0] > curr_max:
-                curr_max = result[0]
-                max_op = result[1]
-            return (max_op, curr_max)
+                result = self.compute_next_operation(environment,(agent_id+1)%2,time_left, AgentTurn.MIN, depth-1, op )
+                if result[0] > curr_max:
+                    curr_max = result[0]
+                    max_op = result[1]
+            return (curr_max, max_op)
         else:
             curr_min = np.inf
             min_op = None
             for environment, op in zip(children, operators):
                 time_left = time_limit - (start_time - time.time())
-                result = self.compute_next_operation(environment,agent_id,time_left, AgentTurn.MAX, depth-1, op )
-            if result[0] < curr_min:
-                curr_min = result[0]
-                min_op = result[1]
-            return (min_op, curr_min)
+                result = self.compute_next_operation(environment,(agent_id+1)%2,time_left, AgentTurn.MAX, depth-1, op )
+                if result[0] < curr_min:
+                    curr_min = result[0]
+                    min_op = result[1]
+            return (curr_min, min_op)
     
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
+        max_depth = env.num_steps//2
         depth = 1
         start_time = time.time()
-        while (time.time() - start_time) < time_offset:
-            operation, value = self.compute_next_operation(env,agent_id,(time.time() - start_time), AgentTurn.MAX, depth, None )
+        operation = None
+        while ( (time.time() - start_time) > time_offset ) and (depth <= max_depth):
+            result = self.compute_next_operation(env,agent_id,(time.time() - start_time), AgentTurn.MAX, depth, operation )
+            if result != (None,None):
+                operation = result[1]
             depth += 1
         return operation
 
