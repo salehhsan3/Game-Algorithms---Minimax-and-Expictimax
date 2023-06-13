@@ -128,7 +128,7 @@ class AgentMinimax(Agent):
             curr_max = -(np.inf)
             max_op = None
             for environment, op in zip(children, operators):
-                time_left = time_limit - (start_time - time.time())
+                time_left = time_limit - (time.time() - start_time)
                 result = self.compute_next_operation(environment,(agent_id+1)%2,time_left, AgentTurn.MIN, depth-1, op )
                 if result[0] > curr_max:
                     curr_max = result[0]
@@ -138,7 +138,7 @@ class AgentMinimax(Agent):
             curr_min = np.inf
             min_op = None
             for environment, op in zip(children, operators):
-                time_left = time_limit - (start_time - time.time())
+                time_left = time_limit - (time.time() - start_time)
                 result = self.compute_next_operation(environment,(agent_id+1)%2,time_left, AgentTurn.MAX, depth-1, op )
                 if result[0] < curr_min:
                     curr_min = result[0]
