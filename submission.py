@@ -130,7 +130,7 @@ class AgentMinimax(Agent):
             for environment, op in zip(children, operators):
                 time_left = time_limit - (time.time() - start_time)
                 result = self.compute_next_operation(environment,(agent_id+1)%2,time_left, AgentTurn.MIN, depth-1)
-                if result != (None, None) and result[0] > curr_max:
+                if (result[0] != None) and (result[0] > curr_max):
                     curr_max = result[0]
                     max_op = op 
             return (curr_max, max_op)
@@ -140,7 +140,7 @@ class AgentMinimax(Agent):
             for environment, op in zip(children, operators):
                 time_left = time_limit - (time.time() - start_time)
                 result = self.compute_next_operation(environment,(agent_id+1)%2,time_left, AgentTurn.MAX, depth-1)
-                if result != (None, None) and result[0] < curr_min:
+                if (result[0] != None) and (result[0] < curr_min):
                     curr_min = result[0]
                     min_op = op
             return (curr_min, min_op)
@@ -150,13 +150,15 @@ class AgentMinimax(Agent):
         depth = 1
         start_time = time.time()
         operation = None
-        while ( (time.time() - start_time) > time_offset ) and (depth <= max_depth):
+        while ( (time.time() - start_time) < time_offset ) and (depth <= max_depth):
             result = self.compute_next_operation(env,agent_id, (time_limit - (time.time() - start_time)), AgentTurn.MAX, depth )
             if result != (None,None):
                 operation = result[1]
             else: # ran out of time
                 break 
             depth += 1
+        if operation == None:
+            what_the_fuck = True
         return operation
 
 class AgentAlphaBeta(Agent):
