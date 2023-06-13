@@ -106,7 +106,7 @@ class AgentGreedyImproved(AgentGreedy):
 
 class AgentMinimax(Agent):
     # TODO: section b : 1
-    def compute_next_operation(self, env: WarehouseEnv, agent_id, time_limit, turn: AgentTurn, depth, operation = None):
+    def compute_next_operation(self, env: WarehouseEnv, agent_id, time_limit, turn: AgentTurn, depth):
         start_time = time.time()
         agent = env.get_robot(agent_id)
         
@@ -117,7 +117,7 @@ class AgentMinimax(Agent):
             dest_value = self.heuristic(env,agent_id)
             if turn == AgentTurn.MIN:
                 dest_value *= (-1)
-            return (operation,dest_value) 
+            return (dest_value, None) 
         
         operators = env.get_legal_operators(agent_id)
         children = [env.clone() for _ in operators]
@@ -132,7 +132,7 @@ class AgentMinimax(Agent):
                 result = self.compute_next_operation(environment,(agent_id+1)%2,time_left, AgentTurn.MIN, depth-1, op )
                 if result != (None, None) and result[0] > curr_max:
                     curr_max = result[0]
-                    max_op = result[1]
+                    max_op = op 
             return (curr_max, max_op)
         else:
             curr_min = np.inf
@@ -142,7 +142,7 @@ class AgentMinimax(Agent):
                 result = self.compute_next_operation(environment,(agent_id+1)%2,time_left, AgentTurn.MAX, depth-1, op )
                 if result != (None, None) and result[0] < curr_min:
                     curr_min = result[0]
-                    min_op = result[1]
+                    min_op = op
             return (curr_min, min_op)
     
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
