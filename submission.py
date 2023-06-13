@@ -15,90 +15,47 @@ class AgentTurn(Enum):
 def smart_heuristic(env: WarehouseEnv, robot_id: int):
     # it's important to remember that there are only 2 packages throughout the game
     agent = env.get_robot(robot_id)
-    adversary = env.get_robot((robot_id+1)%2)
-    
-    agent_value = 0
-    adv_value = 0
-    if agent.package == None:  # Agent doesn't carry a package 
+    adv = env.get_robot((robot_id+1)%2)
+    magic_num = 25
+    is_agent_winning = agent.credit - adv.credit
+    value = 0
+    if agent.package != None:
+        drop_off_dist = manhattan_distance(agent.position, agent.package.destination)
+        dist_charge_st_0 = manhattan_distance(agent.position, env.charge_stations[0].position)
+        dist_charge_st_1 = manhattan_distance(agent.position, env.charge_stations[1].position)
+        nearest_charge_st = min(dist_charge_st_1, dist_charge_st_0)
         
-        if adversary.package != None:  # Adversary Carries A package
-            adv_package = adversary.package
-            pack_ind = 0 if (env.packages[1] == adv_package) else 1
-            agent_pack_dist = manhattan_distance(agent.position, env.packages[pack_ind].position)
-            agent_add_credit = manhattan_distance(env.packages[pack_ind].destination, env.packages[pack_ind].position)
-            adv_pack_dist = manhattan_distance(adversary.position, adv_package.destination)
-            adv_add_credit = manhattan_distance(adv_package.destination, adv_package.position)
-            agent_feasable = (env.num_steps//2) >= (agent_pack_dist + agent_add_credit)
-            adv_feasable = (env.num_steps//2) >= manhattan_distance(adversary.position, adversary.package.destination)
-            
-            if not agent_feasable:
-                agent_value = agent.credit
-            else: # agent is feasable
-                agent_value = 0.75* 2 * agent_add_credit -0.25* agent_pack_dist
-            
-            if not adv_feasable:
-                adv_value = adversary.credit
+        if agent.battery >= drop_off_dist: # has enough battery to deliver package
+            if drop_off_dist == 0:
+                value = magic_num * 2 * (10 + agent.credit)
+            else: # drop_off_dist > 0
+                value = (magic_num * (10 + agent.credit) / drop_off_dist)
+        else: # doesn't have enough battery to drop off package --> should go and recharge
+            if nearest_charge_st == 0:
+                value = magic_num * 2 
             else:
-                adv_value =  0.75* 2 * adv_add_credit -0.25* adv_pack_dist
+                value = (magic_num / nearest_charge_st)
+    else: # agent doesn't have a package
+        dist_agent_pack_0 = manhattan_distance(agent.position, env.packages[0].position)
+        dist_agent_pack_1 = manhattan_distance(agent.position, env.packages[1].position)
+        pick_up_dist = min(dist_agent_pack_0, dist_agent_pack_1) # cost tp pick up nearest package
         
-        else:  # BOTH DONT HAVE ANY PACKAGE
-            
-            agent_pack_dist_0 = manhattan_distance(agent.position, env.packages[0].position)
-            agent_pack_dist_1 = manhattan_distance(agent.position, env.packages[1].position)
-            adv_pack_dist_0 = manhattan_distance(adversary.position, env.packages[0].position)
-            adv_pack_dist_1 = manhattan_distance(adversary.position, env.packages[1].position)
-            add_credit_pack_0 = manhattan_distance(env.packages[0].destination, env.packages[0].position)
-            add_credit_pack_1 = manhattan_distance(env.packages[1].destination, env.packages[1].position)
-            min_agent_pack = min( (agent_pack_dist_0 + add_credit_pack_0), (agent_pack_dist_1 + add_credit_pack_1) )
-            agent_feasable = env.num_steps//2 >=  min_agent_pack
-            min_adv_pack = min( (adv_pack_dist_0 + add_credit_pack_0), (adv_pack_dist_1 + add_credit_pack_1) )
-            adv_feasable = env.num_steps//2 >=  min_adv_pack
-            
-            if not agent_feasable:
-                agent_value = agent.credit
+        dist_charge_st_0 = manhattan_distance(agent.position, env.charge_stations[0].position)
+        dist_charge_st_1 = manhattan_distance(agent.position, env.charge_stations[1].position)
+        nearest_charge_st = min(dist_charge_st_1, dist_charge_st_0) # cost to reach nearest charge station
+        
+        if agent.battery >= pick_up_dist:
+            if pick_up_dist == 0:
+                value = magic_num * 2 * (10 + agent.credit)
             else:
-                agent_pack_0_val = 0.75*2*add_credit_pack_0 - 0.25*agent_pack_dist_0
-                agent_pack_1_val = 0.75*2*add_credit_pack_1 - 0.25*agent_pack_dist_1
-                agent_value = max(agent_pack_0_val, agent_pack_1_val)
+                value = (magic_num * (10 + agent.credit) / pick_up_dist)
+        else: # doesn't have enough battery to pick up a package.
+            if nearest_charge_st == 0:
+                value = magic_num * 2
+            else: # nearest_charge_st > 0
+                value = (magic_num / nearest_charge_st)
                 
-            if not adv_feasable:
-                adv_value = adversary.credit
-            else:
-                adv_pack_0_val = 0.75*2*add_credit_pack_0 - 0.25*adv_pack_dist_0
-                adv_pack_1_val = 0.75*2*add_credit_pack_1 - 0.25*adv_pack_dist_1
-                adv_value = max(adv_pack_0_val, adv_pack_1_val)
-    else: # agent carries a package
-        agent_feasable = env.num_steps//2 >= manhattan_distance(agent.package.destination, agent.position)
-        
-        if not agent_feasable:
-            agent_value = agent.credit
-        else:
-            agent_add_credit = manhattan_distance(agent.package.destination, agent.package.position)
-            agent_pack_dist = manhattan_distance(agent.position, agent.package.destination)
-            agent_value = 0.75*2*agent_add_credit - 0.25*agent_pack_dist
-        
-        if adversary.package != None: # adverasy carries a package
-            adv_pack_dist = manhattan_distance(adversary.position, adversary.package.destination)
-            adv_add_credit = manhattan_distance(adversary.package.destination, adversary.package.position)
-            adv_feasable = env.num_steps//2 >= adv_pack_dist
-            
-            if not adv_feasable:
-                adv_value = adversary.credit
-            else:
-                adv_value = 0.75*2*adv_add_credit - 0.25*adv_pack_dist
-        else: # adversary doesn't carry a package
-            adv_pack_ind = 0 if agent.package == env.packages[1] else 1
-            adv_pack_dist = manhattan_distance(adversary.position, env.packages[adv_pack_ind].position)
-            adv_add_credit = manhattan_distance(env.packages[adv_pack_ind].destination, env.packages[adv_pack_ind].position)
-            adv_feasable = env.num_steps//2 >= (adv_pack_dist + adv_add_credit)
-            
-            if not adv_feasable:
-                adv_value = adversary.credit
-            else:
-                adv_value = 0.75*2*adv_add_credit - 0.25*adv_pack_dist
-    return (agent_value - adv_value)
-
-
+    return value
 class AgentGreedyImproved(AgentGreedy):
     def heuristic(self, env: WarehouseEnv, robot_id: int):
         return smart_heuristic(env, robot_id)
@@ -106,15 +63,15 @@ class AgentGreedyImproved(AgentGreedy):
 
 class AgentMinimax(Agent):
     # TODO: section b : 1
-    def compute_next_operation(self, env: WarehouseEnv, agent_id, time_limit, turn: AgentTurn, depth):
+    def compute_next_operation(self, env: WarehouseEnv, agent_id, time_left, turn: AgentTurn, depth):
         start_time = time.time()
         agent = env.get_robot(agent_id)
         
-        if time_limit <= time_offset:
+        if time_left <= time_offset:
             return (None,None)
         
         if (env.num_steps == 0) or (depth == 0): # game ends when we run out of steps
-            dest_value = self.heuristic(env,agent_id)
+            dest_value = smart_heuristic(env,agent_id)
             if turn == AgentTurn.MIN:
                 dest_value *= (-1)
             return (dest_value, None) 
@@ -128,7 +85,7 @@ class AgentMinimax(Agent):
             curr_max = -(np.inf)
             max_op = None
             for environment, op in zip(children, operators):
-                time_left = time_limit - (time.time() - start_time)
+                time_left = time_left - (time.time() - start_time)
                 result = self.compute_next_operation(environment,(agent_id+1)%2,time_left, AgentTurn.MIN, depth-1)
                 if (result[0] != None) and (result[0] > curr_max):
                     curr_max = result[0]
@@ -138,7 +95,7 @@ class AgentMinimax(Agent):
             curr_min = np.inf
             min_op = None
             for environment, op in zip(children, operators):
-                time_left = time_limit - (time.time() - start_time)
+                time_left = time_left - (time.time() - start_time)
                 result = self.compute_next_operation(environment,(agent_id+1)%2,time_left, AgentTurn.MAX, depth-1)
                 if (result[0] != None) and (result[0] < curr_min):
                     curr_min = result[0]
@@ -146,6 +103,7 @@ class AgentMinimax(Agent):
             return (curr_min, min_op)
     
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
+        
         max_depth = env.num_steps
         depth = 1
         start_time = time.time()
@@ -157,8 +115,6 @@ class AgentMinimax(Agent):
             else: # ran out of time
                 break 
             depth += 1
-        if operation == None:
-            what_the_fuck = True
         return operation
 
 class AgentAlphaBeta(Agent):
@@ -197,44 +153,3 @@ class AgentHardCoded(Agent):
         return random.choice(operators)
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    # agent_dist_from_pack_1 = manhattan_distance(agent.position, env.packages[0].position)
-    # agent_dist_from_pack_2 = manhattan_distance(agent.position, env.packages[1].position)
-    # adv_dist_from_pack_1 = manhattan_distance(adversary.position, env.packages[0].position)
-    # adv_dist_from_pack_2 = manhattan_distance(adversary.position, env.packages[1].position)
-    # agent_nearest_pack_dist = min(agent_dist_from_pack_1,agent_dist_from_pack_2)
-    # drop_off_cost = manhattan_distance(agent.position, agent_nearest_pack_dist)
-    # feasibility = max(0,(env.num_steps/2) - drop_off_cost)
-    
-    # agent_delivery_cost = 0
-    # if agent.package != None: 
-    #     agent_delivery_cost = 2 * manhattan_distance(agent.package.position, agent.package.destination) 
-    
-    # agent_pick_up_cost = 0
-    # if agent.package == None:  # Agent doesn't carry a package: 
-    #     agent_value = 0
-    #     agent_credit = 2 * manhattan_distance(env.packages[pack_ind].position, env.packages[pack_ind].destination) 
-    #     agent_dist = manhattan_distance(agent.position,env.packages[pack_ind].position)
-        
-    #     if adversary.package == None: 
-    #         if (env.num_steps//2) < ():
-    #     else: # adversary has a package and agent doesn't have a package 
-    #         adv_package = adversary.package
-    #         pack_ind = 1 if (adv_package == env.packages[0]) else 0
-           
-    #         agent_value = 0.75*agent_credit - 0.25*agent_dist
-    #         adv_credit = 2 * manhattan_distance(adv_package.position, adv_package.destination)
-    #         adv_dist = manhattan_distance(adversary.position, adv_package.destination)
-    #         adv_value = 0.75*adv_credit - 0.25*adv_dist
-            
-            
-             
-        
-    # return (feasibility + agent_pick_up_cost + agent_delivery_cost)

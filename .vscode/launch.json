@@ -11,7 +11,8 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true
-            "args": ["random" "minimax" "-t" "1000" "-s" "1234" "-c" "200" "--console_print" "--screen_print"],
+            "args": ["greedyImproved", "minimax", "-t", "1000",
+                     "-s", "1234", "-c", "1000", "--console_print", "--screen_print"],
             "purpose": ["debug-in-terminal"]
         }
     ]
