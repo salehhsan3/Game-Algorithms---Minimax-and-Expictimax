@@ -154,6 +154,8 @@ class AgentMinimax(Agent):
             result = self.compute_next_operation(env,agent_id, (time_limit - (time.time() - start_time)), AgentTurn.MAX, depth )
             if result != (None,None):
                 operation = result[1]
+            else: # ran out of time
+                break 
             depth += 1
         return operation
 
