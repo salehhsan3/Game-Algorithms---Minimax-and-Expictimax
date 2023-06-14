@@ -16,44 +16,40 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
     # it's important to remember that there are only 2 packages throughout the game
     agent = env.get_robot(robot_id)
     adv = env.get_robot((robot_id+1)%2)
-    magic_num = 25
-    is_agent_winning = agent.credit - adv.credit
+    magic_num_pick_up = 25
+    magic_num_drop_off = 625
+    
+    charge_st_dists = [manhattan_distance(agent.position, station.position) for station in env.charge_stations]
+    nearest_charge_st = min(charge_st_dists) # cost to reach nearest charge station
+    
     value = 0
     if agent.package != None:
         drop_off_dist = manhattan_distance(agent.position, agent.package.destination)
-        dist_charge_st_0 = manhattan_distance(agent.position, env.charge_stations[0].position)
-        dist_charge_st_1 = manhattan_distance(agent.position, env.charge_stations[1].position)
-        nearest_charge_st = min(dist_charge_st_1, dist_charge_st_0)
         
         if agent.battery >= drop_off_dist: # has enough battery to deliver package
             if drop_off_dist == 0:
-                value = magic_num * 2 * (10 + agent.credit)
-            else: # drop_off_dist > 0
-                value = (magic_num * (10 + agent.credit) / drop_off_dist)
+                value = magic_num_drop_off * 2 * (1 + agent.credit)
+            else:
+                value = (magic_num_drop_off * (1 + agent.credit) / drop_off_dist)
         else: # doesn't have enough battery to drop off package --> should go and recharge
             if nearest_charge_st == 0:
-                value = magic_num * 2 
+                value = magic_num_drop_off * 2 
             else:
-                value = (magic_num / nearest_charge_st)
+                value = (magic_num_drop_off / nearest_charge_st)
     else: # agent doesn't have a package
-        dist_agent_pack_0 = manhattan_distance(agent.position, env.packages[0].position)
-        dist_agent_pack_1 = manhattan_distance(agent.position, env.packages[1].position)
-        pick_up_dist = min(dist_agent_pack_0, dist_agent_pack_1) # cost tp pick up nearest package
-        
-        dist_charge_st_0 = manhattan_distance(agent.position, env.charge_stations[0].position)
-        dist_charge_st_1 = manhattan_distance(agent.position, env.charge_stations[1].position)
-        nearest_charge_st = min(dist_charge_st_1, dist_charge_st_0) # cost to reach nearest charge station
+        packages_dists = [manhattan_distance(agent.position, package.position) for package in env.packages if (package.on_board == True)]
+        pick_up_dist = min(packages_dists) # cost tp pick up nearest package
         
         if agent.battery >= pick_up_dist:
             if pick_up_dist == 0:
-                value = magic_num * 2 * (10 + agent.credit)
+                value = magic_num_pick_up * 2 + (1 + agent.credit * magic_num_drop_off)
             else:
-                value = (magic_num * (10 + agent.credit) / pick_up_dist)
+                value = ( (magic_num_pick_up + (1 + agent.credit * magic_num_drop_off)) / pick_up_dist)
         else: # doesn't have enough battery to pick up a package.
             if nearest_charge_st == 0:
-                value = magic_num * 2
-            else: # nearest_charge_st > 0
-                value = (magic_num / nearest_charge_st)
+                value = magic_num_pick_up * 2
+            else:
+                value = (magic_num_pick_up / nearest_charge_st)
                 
     return value
 class AgentGreedyImproved(AgentGreedy):
