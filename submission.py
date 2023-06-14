@@ -66,11 +66,13 @@ class AgentMinimax(Agent):
         if time_left <= time_offset:
             return (None,None)
         
-        if (env.num_steps == 0) or (depth == 0): # game ends when we run out of steps
-            dest_value = smart_heuristic(env,agent_id)
+        if (env.num_steps == 0) or (depth == 0):  # game ends when we run out of steps
             if turn == AgentTurn.MIN:
-                dest_value *= (-1)
-            return (dest_value, None) 
+                agent_id = 1 - agent_id
+            dest_value = smart_heuristic(env, agent_id)
+            # if turn == AgentTurn.MIN:
+            #    dest_value *= (-1)
+            return dest_value, None
         
         operators = env.get_legal_operators(agent_id)
         children = [env.clone() for _ in operators]
@@ -104,9 +106,9 @@ class AgentMinimax(Agent):
         depth = 1
         start_time = time.time()
         operation = None
-        while ( (time.time() - start_time) < time_offset ) and (depth <= max_depth):
+        while ( ( (time.time() - start_time) < time_offset ) and (depth <= max_depth) ):
             result = self.compute_next_operation(env,agent_id, (time_limit - (time.time() - start_time)), AgentTurn.MAX, depth )
-            if result != (None,None):
+            if result[1] is not None:
                 operation = result[1]
             else: # ran out of time
                 break 
