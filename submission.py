@@ -16,8 +16,8 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
     # it's important to remember that there are only 2 packages throughout the game
     agent = env.get_robot(robot_id)
     adv = env.get_robot((robot_id+1)%2)
-    magic_num_pick_up = 25
-    magic_num_drop_off = 625
+    magic_num_pick_up = 10
+    magic_num_drop_off = 100
     
     charge_st_dists = [manhattan_distance(agent.position, station.position) for station in env.charge_stations]
     nearest_charge_st = min(charge_st_dists) # cost to reach nearest charge station
@@ -28,9 +28,12 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
         
         if agent.battery >= drop_off_dist: # has enough battery to deliver package
             if drop_off_dist == 0:
-                value = magic_num_drop_off * 2 * (1 + agent.credit)
+                value = float("inf")
             else:
-                value = (magic_num_drop_off * (1 + agent.credit) / drop_off_dist)
+                if manhattan_distance(agent.position, agent.package.position) == 0:
+                    value = float("inf")
+                else:
+                    value = ( ( (1 + agent.credit) ) / drop_off_dist )
         else: # doesn't have enough battery to drop off package --> should go and recharge
             if nearest_charge_st == 0:
                 value = magic_num_drop_off * 2 
@@ -42,9 +45,9 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
         
         if agent.battery >= pick_up_dist:
             if pick_up_dist == 0:
-                value = magic_num_pick_up * 2 + (1 + agent.credit * magic_num_drop_off)
+                value = float("inf")
             else:
-                value = ( (magic_num_pick_up + (1 + agent.credit * magic_num_drop_off)) / pick_up_dist)
+                value = ( ( (1 + agent.credit) ) / pick_up_dist)
         else: # doesn't have enough battery to pick up a package.
             if nearest_charge_st == 0:
                 value = magic_num_pick_up * 2
@@ -52,6 +55,31 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
                 value = (magic_num_pick_up / nearest_charge_st)
                 
     return value
+
+# def smart_heuristic(env: WarehouseEnv, robot_id: int):
+#     # it's important to remember that there are only 2 packages throughout the game
+#     agent = env.get_robot(robot_id)
+#     adv = env.get_robot((robot_id+1)%2)
+#     magic_num_pick_up = 10
+#     magic_num_drop_off = 100
+    
+#     charge_st_dists = [manhattan_distance(agent.position, station.position) for station in env.charge_stations]
+#     nearest_charge_st = min(charge_st_dists) # cost to reach nearest charge station
+    
+#     value = 0
+#     if agent.package != None:
+#         drop_off_dist = manhattan_distance(agent.package.position, agent.package.destination)
+#         return (2*drop_off_dist)
+#     else: # agent doesn't have a package
+#         packages_dists = [manhattan_distance(agent.position, package.position) for package in env.packages if (package.on_board == True)]
+#         nearest_package = min(packages_dists)
+#         new_package_credit = 0
+#         for package in env.packages:
+#             if package.on_board:
+#                 new_package_credit = 2 * manhattan_distance(package.position, package.destination)
+
+#         score = - nearest_package - nearest_charge_st - agent.battery + new_package_credit
+#         return score
 class AgentGreedyImproved(AgentGreedy):
     def heuristic(self, env: WarehouseEnv, robot_id: int):
         return smart_heuristic(env, robot_id)
@@ -59,6 +87,11 @@ class AgentGreedyImproved(AgentGreedy):
 
 class AgentMinimax(Agent):
     # TODO: section b : 1
+    def heuristic(self, env: WarehouseEnv, robot_id: int):
+        agent = env.get_robot(robot_id)
+        adv = env.get_robot((robot_id + 1)%2)
+        return ( ( agent.credit - adv.credit ) + 0.5 * (agent.battery - adv.battery) )
+
     def compute_next_operation(self, env: WarehouseEnv, agent_id, time_left, turn: AgentTurn, depth):
         start_time = time.time()
         agent = env.get_robot(agent_id)
@@ -68,10 +101,8 @@ class AgentMinimax(Agent):
         
         if (env.num_steps == 0) or (depth == 0):  # game ends when we run out of steps
             if turn == AgentTurn.MIN:
-                agent_id = 1 - agent_id
-            dest_value = smart_heuristic(env, agent_id)
-            # if turn == AgentTurn.MIN:
-            #    dest_value *= (-1)
+                agent_id = (agent_id + 1)%2
+            dest_value = self.heuristic(env, agent_id)
             return dest_value, None
         
         operators = env.get_legal_operators(agent_id)
@@ -117,8 +148,69 @@ class AgentMinimax(Agent):
 
 class AgentAlphaBeta(Agent):
     # TODO: section c : 1
+    
+    def heuristic(self, env: WarehouseEnv, robot_id: int):
+        agent = env.get_robot(robot_id)
+        adv = env.get_robot((robot_id + 1)%2)
+        return ( ( agent.credit - adv.credit ) + 0.5 * (agent.battery - adv.battery) )
+    
+    def compute_next_operation( self, env:WarehouseEnv, agent_id, time_limit, turn:AgentTurn, depth, alpha, beta):
+        start_time = time.time()
+        
+        if time_left <= time_offset:
+            return (None,None)
+        
+        if (env.num_steps == 0) or (depth == 0):  # game ends when we run out of steps
+            if turn == AgentTurn.MIN:
+                agent_id = (agent_id + 1)%2
+            dest_value = self.heuristic(env, agent_id)
+            return dest_value, None
+        
+        operators = env.get_legal_operators(agent_id)
+        children = [env.clone() for _ in operators]
+        for child, op in zip(children, operators):
+            child.apply_operator(agent_id, op)
+            
+        if turn == AgentTurn.MAX: 
+            max_op = None
+            for environment, op in zip(children, operators):
+                time_left = time_left - (time.time() - start_time)
+                result = self.compute_next_operation(environment,(agent_id+1)%2,time_left, AgentTurn.MIN, depth-1, alpha, beta)
+                if (result[0] != None):
+                    if result[0] >= beta:
+                        return (beta, max_op) # cut off
+                    elif (result[0] > alpha):
+                        alpha = result[0]
+                        max_op = op 
+            return (alpha, max_op)
+        else: # turn == AgentTurn.MIN
+            min_op = None
+            for environment, op in zip(children, operators):
+                time_left = time_left - (time.time() - start_time)
+                result = self.compute_next_operation(environment,(agent_id+1)%2,time_left, AgentTurn.MAX, depth-1, alpha, beta)
+                if (result[0] != None):
+                    if result[0] <= alpha:
+                        return (alpha, min_op) # cut off
+                    elif (result[0] < beta):
+                        beta = result[0]
+                        min_op = op
+            return (beta, min_op)
+    
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
-        raise NotImplementedError()
+        max_depth = env.num_steps
+        depth = 1
+        start_time = time.time()
+        operation = None
+        alpha = -(np.inf)
+        beta = np.inf
+        while ( ( (time.time() - start_time) < time_offset ) and (depth <= max_depth) ):
+            result = self.compute_next_operation(env,agent_id, (time_limit - (time.time() - start_time)), AgentTurn.MAX, depth, alpha, beta )
+            if result[1] is not None:
+                operation = result[1]
+            else: # ran out of time
+                break 
+            depth += 1
+        return operation
 
 
 class AgentExpectimax(Agent):
