@@ -10,6 +10,7 @@ time_offset = 0.1 # an offset from the time_limit given to our algorithms to ens
 class AgentTurn(Enum):
     MAX = 0
     MIN = 1
+    PROB = 2
 
 # TODO: section a : 3
 def smart_heuristic(env: WarehouseEnv, robot_id: int):
@@ -218,8 +219,71 @@ class AgentAlphaBeta(Agent):
 
 class AgentExpectimax(Agent):
     # TODO: section d : 1
+    def heuristic(self, env: WarehouseEnv, robot_id: int):
+        agent = env.get_robot(robot_id)
+        adv = env.get_robot((robot_id + 1)%2)
+        return ( ( agent.credit - adv.credit ) + 0.5 * (agent.battery - adv.battery) )
+    
+    def compute_next_operation( self, env:WarehouseEnv, agent_id, time_left, turn:AgentTurn, depth, last_caller:AgentTurn = None):
+        start_time = time.time()
+        
+        if time_left <= time_offset:
+            return (None,None)
+        
+        if (env.num_steps == 0) or (depth == 0):  # game ends when we run out of steps
+            if turn == AgentTurn.MIN:
+                agent_id = (agent_id + 1)%2
+            dest_value = self.heuristic(env, agent_id)
+            return dest_value, None
+        
+        operators = env.get_legal_operators(agent_id)
+        children = [env.clone() for _ in operators]
+        for child, op in zip(children, operators):
+            child.apply_operator(agent_id, op)
+        
+        if turn == AgentTurn.PROB:
+            expected = 0
+            probability = (1 / len(operators))
+            for environment, op in zip(children, operators):
+                time_left = time_left - (time.time() - start_time)
+                result = self.compute_next_operation(environment,(agent_id+1)%2,time_left, AgentTurn.PROB, depth-1, AgentTurn.MAX)
+                if result[0] != None:
+                    expected += (probability * result[0])
+            return (expected, None)
+        
+        elif turn == AgentTurn.MAX: 
+            max_op = None
+            curr_max = -(np.inf)
+            for environment, op in zip(children, operators):
+                time_left = time_left - (time.time() - start_time)
+                result = self.compute_next_operation(environment,(agent_id+1)%2,time_left, AgentTurn.PROB, depth-1, AgentTurn.MAX)
+                if (result[0] != None) and ((result[0] > curr_max)):
+                        curr_max = result[0]
+                        max_op = op 
+            return (curr_max, max_op)
+        elif turn == AgentTurn.MIN: 
+            min_op = None
+            for environment, op in zip(children, operators):
+                time_left = time_left - (time.time() - start_time)
+                result = self.compute_next_operation(environment,(agent_id+1)%2,time_left, AgentTurn.PROB, depth-1, AgentTurn.MIN)
+                if (result[0] != None):
+                        curr_min = result[0]
+                        min_op = op
+            return (curr_min, min_op)
+        
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
-        raise NotImplementedError()
+        max_depth = env.num_steps
+        depth = 1
+        start_time = time.time()
+        operation = None
+        while ( ( (time.time() - start_time) < time_offset ) and (depth <= max_depth) ):
+            result = self.compute_next_operation(env,agent_id, (time_limit - (time.time() - start_time)), AgentTurn.MAX, depth, None )
+            if result[1] is not None:
+                operation = result[1]
+            else: # ran out of time
+                break 
+            depth += 1
+        return operation
 
 
 # here you can check specific paths to get to know the environment
