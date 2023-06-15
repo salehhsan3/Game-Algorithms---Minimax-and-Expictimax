@@ -16,8 +16,8 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
     # it's important to remember that there are only 2 packages throughout the game
     agent = env.get_robot(robot_id)
     adv = env.get_robot((robot_id+1)%2)
-    magic_num_pick_up = 10
-    magic_num_drop_off = 100
+    magic_num_pick_up = 100
+    magic_num_drop_off = 10
     
     charge_st_dists = [manhattan_distance(agent.position, station.position) for station in env.charge_stations]
     nearest_charge_st = min(charge_st_dists) # cost to reach nearest charge station
@@ -25,15 +25,12 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
     value = 0
     if agent.package != None:
         drop_off_dist = manhattan_distance(agent.position, agent.package.destination)
-        
+        drop_off_gain = manhattan_distance(agent.package.position, agent.package.destination)
         if agent.battery >= drop_off_dist: # has enough battery to deliver package
-            if drop_off_dist == 0:
-                value = float("inf")
+            if drop_off_dist == 0 :
+                value = ((1 + agent.credit) * drop_off_gain)
             else:
-                if manhattan_distance(agent.position, agent.package.position) == 0:
-                    value = float("inf")
-                else:
-                    value = ( ( (1 + agent.credit) ) / drop_off_dist )
+                value = (((1 + agent.credit) * drop_off_gain) / magic_num_drop_off)
         else: # doesn't have enough battery to drop off package --> should go and recharge
             if nearest_charge_st == 0:
                 value = magic_num_drop_off * 2 
@@ -42,12 +39,18 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
     else: # agent doesn't have a package
         packages_dists = [manhattan_distance(agent.position, package.position) for package in env.packages if (package.on_board == True)]
         pick_up_dist = min(packages_dists) # cost tp pick up nearest package
-        
+        package = None
+        for pack in env.packages:
+            if (pack.on_board == True) and (manhattan_distance(pack.position, agent.position) == pick_up_dist):
+                package = pack
+                
+        potential_gain = 2 * manhattan_distance(package.position, package.destination)
         if agent.battery >= pick_up_dist:
             if pick_up_dist == 0:
-                value = float("inf")
+                value = (((1 + agent.credit) * potential_gain) / magic_num_pick_up)
             else:
-                value = ( ( (1 + agent.credit) ) / pick_up_dist)
+                value = (( ( 1 + agent.credit ) / pick_up_dist) / magic_num_pick_up)
+            
         else: # doesn't have enough battery to pick up a package.
             if nearest_charge_st == 0:
                 value = magic_num_pick_up * 2
@@ -154,7 +157,7 @@ class AgentAlphaBeta(Agent):
         adv = env.get_robot((robot_id + 1)%2)
         return ( ( agent.credit - adv.credit ) + 0.5 * (agent.battery - adv.battery) )
     
-    def compute_next_operation( self, env:WarehouseEnv, agent_id, time_limit, turn:AgentTurn, depth, alpha, beta):
+    def compute_next_operation( self, env:WarehouseEnv, agent_id, time_left, turn:AgentTurn, depth, alpha, beta):
         start_time = time.time()
         
         if time_left <= time_offset:
@@ -178,7 +181,7 @@ class AgentAlphaBeta(Agent):
                 result = self.compute_next_operation(environment,(agent_id+1)%2,time_left, AgentTurn.MIN, depth-1, alpha, beta)
                 if (result[0] != None):
                     if result[0] >= beta:
-                        return (beta, max_op) # cut off
+                        return (beta, None) # cut off
                     elif (result[0] > alpha):
                         alpha = result[0]
                         max_op = op 
@@ -190,7 +193,7 @@ class AgentAlphaBeta(Agent):
                 result = self.compute_next_operation(environment,(agent_id+1)%2,time_left, AgentTurn.MAX, depth-1, alpha, beta)
                 if (result[0] != None):
                     if result[0] <= alpha:
-                        return (alpha, min_op) # cut off
+                        return (alpha, None) # cut off
                     elif (result[0] < beta):
                         beta = result[0]
                         min_op = op
