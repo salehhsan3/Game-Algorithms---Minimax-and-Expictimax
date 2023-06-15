@@ -246,7 +246,10 @@ class AgentExpectimax(Agent):
             probability = (1 / len(operators))
             for environment, op in zip(children, operators):
                 time_left = time_left - (time.time() - start_time)
-                result = self.compute_next_operation(environment,(agent_id+1)%2,time_left, AgentTurn.PROB, depth-1, AgentTurn.MAX)
+                if last_caller == AgentTurn.MAX:
+                    result = self.compute_next_operation(environment,(agent_id+1)%2,time_left, AgentTurn.MIN, depth-1, AgentTurn.PROB)
+                elif last_caller == AgentTurn.MIN:
+                    result = self.compute_next_operation(environment,(agent_id+1)%2,time_left, AgentTurn.MAX, depth-1, AgentTurn.PROB)
                 if result[0] != None:
                     expected += (probability * result[0])
             return (expected, None)
