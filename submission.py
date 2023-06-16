@@ -209,7 +209,7 @@ class AgentExpectimax(Agent):
             curr_max = -(np.inf)
             for environment, op in zip(children, operators):
                 time_left = time_left - (time.time() - start_time)
-                result = self.compute_next_operation(environment,(agent_id+1)%2,time_left, AgentTurn.PROB, depth-1, AgentTurn.MAX)
+                result = self.compute_next_operation(environment,agent_id,time_left, AgentTurn.PROB, depth-1, AgentTurn.MAX)
                 if (result[0] != None) and ((result[0] > curr_max)):
                         curr_max = result[0]
                         max_op = op 
@@ -218,7 +218,7 @@ class AgentExpectimax(Agent):
             min_op = None
             for environment, op in zip(children, operators):
                 time_left = time_left - (time.time() - start_time)
-                result = self.compute_next_operation(environment,(agent_id+1)%2,time_left, AgentTurn.PROB, depth-1, AgentTurn.MIN)
+                result = self.compute_next_operation(environment,agent_id,time_left, AgentTurn.PROB, depth-1, AgentTurn.MIN)
                 if (result[0] != None):
                         curr_min = result[0]
                         min_op = op
