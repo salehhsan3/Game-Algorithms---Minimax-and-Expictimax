@@ -15,20 +15,18 @@ class AgentTurn(Enum):
 # TODO: section a : 3
 def smart_heuristic(env: WarehouseEnv, robot_id: int):
     agent: Robot = env.get_robot(robot_id)
-    adversary = env.get_robot(1 - robot_id)
+    station_dists = [manhattan_distance(agent.position, station.position) for station in env.charge_stations]
+    closest_station = min(station_dists)
     dist = 0
-
+    
     if agent.package is None:
         dists_from_packs = [manhattan_distance(agent.position, p.position) for p in env.packages if (p.on_board == True)]
         dist = min(dists_from_packs)
     else:  # agent carries a package
         dist = manhattan_distance(agent.position, agent.package.destination)
-    
-    station_dists = [manhattan_distance(agent.position, station.position) for station in env.charge_stations]
-    closest_station = min(station_dists)
 
-    if agent.battery <= closest_station:        # once all you can do is get to a charging station, go charge..
-        return -1 * (agent.credit + closest_station)
+    if agent.battery <= dist:        # once all you can do is get to a charging station, go charge..
+        return (-1) * (agent.credit + closest_station)
 
     return (100 * (agent.package is not None)) + (100 * agent.credit) - dist
 
