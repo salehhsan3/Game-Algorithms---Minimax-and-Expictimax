@@ -6,6 +6,7 @@ import argparse
 import submission
 import Agent
 
+import os # addition!!!!!!
 
 def run_agents():
     parser = argparse.ArgumentParser(description='Test your submission by pitting agents against each other.')
@@ -70,8 +71,10 @@ def run_agents():
         print(balances)
         if balances[0] == balances[1]:
             print('draw')
+            os._exit(258) # addition!!!!!!!!!!!!
         else:
             print('robot', balances.index(max(balances)), 'wins!')
+            os._exit(256 + balances.index(max(balances))) # addition!!!!!!!!!!
     else:
         robot0_wins = 0
         robot1_wins = 0

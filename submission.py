@@ -133,7 +133,7 @@ class AgentAlphaBeta(Agent):
                 result = self.compute_next_operation(environment, agent_id, time_left, AgentTurn.MIN, depth-1, alpha, beta)
                 if (result[0] != None):
                     if result[0] >= beta:
-                        return (beta, None) # cut off
+                        return (beta, op) # cut off
                     elif (result[0] > alpha):
                         alpha = result[0]
                         max_op = op 
@@ -145,7 +145,7 @@ class AgentAlphaBeta(Agent):
                 result = self.compute_next_operation(environment, agent_id, time_left, AgentTurn.MAX, depth-1, alpha, beta)
                 if (result[0] != None):
                     if result[0] <= alpha:
-                        return (alpha, None) # cut off
+                        return (alpha, op) # cut off
                     elif (result[0] < beta):
                         beta = result[0]
                         min_op = op
