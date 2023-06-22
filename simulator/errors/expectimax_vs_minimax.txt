@@ -1,0 +1,27 @@
+Traceback (most recent call last):
+  File "C:\Users\Saleh\Desktop\Intro2AI\Intro2AI_HW2\simulator\main.py", line 123, in <module>
+    run_agents()
+  File "C:\Users\Saleh\Desktop\Intro2AI\Intro2AI_HW2\simulator\main.py", line 62, in run_agents
+    env.apply_operator(i, op)
+  File "C:\Users\Saleh\Desktop\Intro2AI\Intro2AI_HW2\simulator\WarehouseEnv.py", line 136, in apply_operator
+    assert operator in self.get_legal_operators(robot_index)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+Traceback (most recent call last):
+  File "C:\Users\Saleh\Desktop\Intro2AI\Intro2AI_HW2\simulator\main.py", line 123, in <module>
+    run_agents()
+  File "C:\Users\Saleh\Desktop\Intro2AI\Intro2AI_HW2\simulator\main.py", line 62, in run_agents
+    env.apply_operator(i, op)
+  File "C:\Users\Saleh\Desktop\Intro2AI\Intro2AI_HW2\simulator\WarehouseEnv.py", line 136, in apply_operator
+    assert operator in self.get_legal_operators(robot_index)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+Traceback (most recent call last):
+  File "C:\Users\Saleh\Desktop\Intro2AI\Intro2AI_HW2\simulator\main.py", line 123, in <module>
+    run_agents()
+  File "C:\Users\Saleh\Desktop\Intro2AI\Intro2AI_HW2\simulator\main.py", line 62, in run_agents
+    env.apply_operator(i, op)
+  File "C:\Users\Saleh\Desktop\Intro2AI\Intro2AI_HW2\simulator\WarehouseEnv.py", line 136, in apply_operator
+    assert operator in self.get_legal_operators(robot_index)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

@@ -71,10 +71,10 @@ def run_agents():
         print(balances)
         if balances[0] == balances[1]:
             print('draw')
-            os._exit(258) # addition!!!!!!!!!!!!
+            os._exit(22) # addition!!!!!!!!!!!!
         else:
             print('robot', balances.index(max(balances)), 'wins!')
-            os._exit(256 + balances.index(max(balances))) # addition!!!!!!!!!!
+            os._exit(20 + balances.index(max(balances))) # addition!!!!!!!!!!
     else:
         robot0_wins = 0
         robot1_wins = 0
