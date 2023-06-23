@@ -1,31 +1,36 @@
 import os
 import shutil
 import csv
+import random
 # format: ((agent_0, agent_1), simulations_num)
-agents = [
-        (("greedyImproved",	"greedyImproved"), 4),
-        (("minimax",	"minimax"), 4),
-        (("alphabeta",	"alphabeta"), 4),
-        (("expectimax",	"expectimax"), 4),
-        (("greedyImproved",	"expectimax"), 4),
-        (("minimax",	"greedyImproved"), 4),
-        (("alphabeta",	"minimax"), 4),
-        (("expectimax",	"alphabeta"), 4),
-        (("greedyImproved",	"alphabeta"), 4),
-        (("minimax",	"expectimax"), 4),
-        (("alphabeta",	"greedyImproved"), 4),
-        (("expectimax",	"minimax"), 4),
-        (("greedyImproved",	"minimax"), 4),
-        (("minimax",	"alphabeta"), 4),
-        (("alphabeta",	"expectimax"), 4),
-        (("expectimax",	"greedyImproved"), 4),        
-    ]
+agents = [] # for every possible agent
+for agent_0 in ["random", "greedy", "greedyImproved", "minimax", "alphabeta", "expectimax"]:
+    for agent_1 in ["random", "greedy", "greedyImproved", "minimax", "alphabeta", "expectimax"]:
+        agents.append(((agent_0, agent_1), 10))
+# for the agents we implemented
+# agents = [ 
+#         (("greedyImproved",	"greedyImproved"), 10),
+#         (("minimax",	"minimax"), 10),
+#         (("alphabeta",	"alphabeta"), 10),
+#         (("expectimax",	"expectimax"), 10),
+#         (("greedyImproved",	"expectimax"), 10),
+#         (("minimax",	"greedyImproved"), 10),
+#         (("alphabeta",	"minimax"), 10),
+#         (("expectimax",	"alphabeta"), 10),
+#         (("greedyImproved",	"alphabeta"), 10),
+#         (("minimax",	"expectimax"), 10),
+#         (("alphabeta",	"greedyImproved"), 10),
+#         (("expectimax",	"minimax"), 10),
+#         (("greedyImproved",	"minimax"), 10),
+#         (("minimax",	"alphabeta"), 10),
+#         (("alphabeta",	"expectimax"), 10),
+#         (("expectimax",	"greedyImproved"), 10),        
+#     ]
 
 
 def simulations():
     student = 'saleh' # add credentials if u want
     header = ['Agent_0:', 'Agent_1:', 'Number Of Simulations:', 'Agent_0 wins:', 'Agent_1 wins:', 'Draws:', 'Errors', 'Student:']
-    data = []
     if not os.path.isdir('./simulator'):
         os.mkdir("./simulator")
     shutil.copy('./submission.py', './simulator/submission.py')
@@ -59,7 +64,11 @@ def simulations():
             match_err = './simulator/errors/' + agent_0 + '_vs_' + agent_1 + '.txt'
             for i in range(simulations_num):
                 # exit_val = os.system("python main.py " + agent_0 + " " + agent_1 + " -t 1 -s 1234 -c 200 --console_print --screen_print") # to watch the match
-                cmd = "python ./simulator/main.py " + agent_0 + " " + agent_1 + " -t 1 -s 1234 -c 200"
+                seed = random.randint(0,1234)
+                steps_num = random.randint(50,500)
+                seed_arg = " -s " + str(seed)
+                step_num_arg = " -c " + str(steps_num)
+                cmd = "python ./simulator/main.py " + agent_0 + " " + agent_1 + " -t 1" + seed_arg + step_num_arg
                 exit_val = os.system( cmd + ' >> ' + f'{match_out}' + ' 2>> ' + f'{match_err}' )
                 if exit_val == 20:
                     agent_0_wins += 1
@@ -71,7 +80,5 @@ def simulations():
                     errors += 1
             row = [agent_0, agent_1, simulations_num, agent_0_wins, agent_1_wins, draws, errors, student]
             csvwriter.writerow(row)
-           # started: 11:51
-           # finished: 12:14
            # takes too long!
 simulations()
