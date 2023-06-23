@@ -226,7 +226,7 @@ class AgentExpectimax(Agent):
                 children = [env.clone() for _ in operators]
                 for child, op in zip(children, operators):
                     child.apply_operator(agent_id, op)
-                heuristics = [  self.compute_next_operation(child, agent_id, (time_limit - (time.time() - start_time)), AgentTurn.MIN, depth )
+                heuristics = [  self.compute_next_operation(child, agent_id, (time_limit - (time.time() - start_time)), AgentTurn.EXP, depth )
                                 for child in children   ]
                 operation = operators[ heuristics.index( max(heuristics) ) ]
                 heuristics.clear()
