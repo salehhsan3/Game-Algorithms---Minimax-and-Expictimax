@@ -59,7 +59,6 @@ def run_agents():
                 end = time.time()
                 if end - start > args.time_limit:
                     raise RuntimeError("Agent used too much time!")
-                assert op!=None
                 env.apply_operator(i, op)
                 if args.console_print:
                     print('robot ' + str(i) + ' chose ' + op)
@@ -72,10 +71,8 @@ def run_agents():
         print(balances)
         if balances[0] == balances[1]:
             print('draw')
-            os._exit(22) # addition!!!!!!!!!!!!
         else:
             print('robot', balances.index(max(balances)), 'wins!')
-            os._exit(20 + balances.index(max(balances))) # addition!!!!!!!!!!
     else:
         robot0_wins = 0
         robot1_wins = 0
