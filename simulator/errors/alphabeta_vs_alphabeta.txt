@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "C:\Users\Saleh\Desktop\Intro2AI\Intro2AI_HW2\simulator\main.py", line 123, in <module>
+    run_agents()
+  File "C:\Users\Saleh\Desktop\Intro2AI\Intro2AI_HW2\simulator\main.py", line 61, in run_agents
+    raise RuntimeError("Agent used too much time!")
+RuntimeError: Agent used too much time!
+Traceback (most recent call last):
+  File "C:\Users\Saleh\Desktop\Intro2AI\Intro2AI_HW2\simulator\main.py", line 123, in <module>
+    run_agents()
+  File "C:\Users\Saleh\Desktop\Intro2AI\Intro2AI_HW2\simulator\main.py", line 61, in run_agents
+    raise RuntimeError("Agent used too much time!")
+RuntimeError: Agent used too much time!
