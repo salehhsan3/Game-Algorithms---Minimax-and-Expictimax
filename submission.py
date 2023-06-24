@@ -95,7 +95,7 @@ class AgentMinimax(Agent):
                 heuristics = [  self.compute_next_operation(child,agent_id, (time_limit - (time.time() - start_time)), AgentTurn.MIN, depth)
                                 for child in children   ]
                 operation = operators[ heuristics.index( max(heuristics) ) ]
-                heuristics.clear()
+                # heuristics.clear()
                 depth += 1
             except TimeoutError: # ran out of time
                 return operation
@@ -164,7 +164,7 @@ class AgentAlphaBeta(Agent):
                 heuristics = [  self.compute_next_operation(child, agent_id, (time_limit - (time.time() - start_time)), AgentTurn.MIN, depth, alpha=(-(np.inf)), beta=(np.inf) )
                                 for child in children   ]
                 operation = operators[ heuristics.index( max(heuristics) ) ]
-                heuristics.clear()
+                # heuristics.clear()
                 depth += 1
             except TimeoutError: # ran out of time
                 return operation
@@ -221,7 +221,7 @@ class AgentExpectimax(Agent):
         operation = 'park'
         while  (depth <= max_depth):
             try:
-                # we perform the MAX action on the children heuristics here therefore, we call the function with MIN argument
+                # we perform the MAX action on the children heuristics here therefore, we call the function with EXP argument
                 operators = env.get_legal_operators(agent_id)
                 children = [env.clone() for _ in operators]
                 for child, op in zip(children, operators):
@@ -229,7 +229,7 @@ class AgentExpectimax(Agent):
                 heuristics = [  self.compute_next_operation(child, agent_id, (time_limit - (time.time() - start_time)), AgentTurn.EXP, depth )
                                 for child in children   ]
                 operation = operators[ heuristics.index( max(heuristics) ) ]
-                heuristics.clear()
+                # heuristics.clear()
                 depth += 1
             except TimeoutError: # ran out of time
                 return operation
