@@ -49,7 +49,7 @@ class AgentMinimax(Agent):
         if env.done():
             return game_done_utility(env,robot_id)
         else:
-            return smart_heuristic(env,robot_id) - smart_heuristic(env, (robot_id+1)%2)
+            return smart_heuristic(env,robot_id)
 
     def compute_next_operation(self, env: WarehouseEnv, agent_id, time_left, turn: AgentTurn, depth):
         start_time = time.time()
@@ -82,10 +82,10 @@ class AgentMinimax(Agent):
     
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
         start_time = time.time()
-        max_depth = env.num_steps
+        # max_depth = env.num_steps
         depth = 1
         operation = 'park'
-        while (depth <= max_depth) :
+        while (True) :
             try:
                 # we perform the MAX action on the children heuristics here therefore, we call the function with MIN argument
                 operators = env.get_legal_operators(agent_id)
@@ -95,7 +95,6 @@ class AgentMinimax(Agent):
                 heuristics = [  self.compute_next_operation(child,agent_id, (time_limit - (time.time() - start_time)), AgentTurn.MIN, depth)
                                 for child in children   ]
                 operation = operators[ heuristics.index( max(heuristics) ) ]
-                heuristics.clear()
                 depth += 1
             except TimeoutError: # ran out of time
                 return operation
@@ -108,7 +107,7 @@ class AgentAlphaBeta(Agent):
         if env.done():
             return game_done_utility(env,robot_id)
         else:
-            return smart_heuristic(env,robot_id) - smart_heuristic(env, (robot_id+1)%2)
+            return smart_heuristic(env,robot_id)
     
     def compute_next_operation( self, env:WarehouseEnv, agent_id, time_left, turn:AgentTurn, depth, alpha, beta):
         start_time = time.time()
@@ -150,11 +149,11 @@ class AgentAlphaBeta(Agent):
             return curr_min
     
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
-        max_depth = env.num_steps
+        # max_depth = env.num_steps
         depth = 1
         start_time = time.time()
         operation = 'park'
-        while  (depth <= max_depth):
+        while  (True):
             try:
                 # we perform the MAX action on the children heuristics here therefore, we call the function with MIN argument
                 operators = env.get_legal_operators(agent_id)
@@ -164,7 +163,6 @@ class AgentAlphaBeta(Agent):
                 heuristics = [  self.compute_next_operation(child, agent_id, (time_limit - (time.time() - start_time)), AgentTurn.MIN, depth, alpha=(-(np.inf)), beta=(np.inf) )
                                 for child in children   ]
                 operation = operators[ heuristics.index( max(heuristics) ) ]
-                heuristics.clear()
                 depth += 1
             except TimeoutError: # ran out of time
                 return operation
@@ -177,7 +175,7 @@ class AgentExpectimax(Agent):
         if env.done():
             return game_done_utility(env, robot_id)
         else:
-            return smart_heuristic(env,robot_id) - smart_heuristic(env, (robot_id+1)%2)
+            return smart_heuristic(env,robot_id)
     
     def compute_next_operation( self, env:WarehouseEnv, agent_id, time_left, turn:AgentTurn, depth):
         start_time = time.time()
@@ -215,21 +213,20 @@ class AgentExpectimax(Agent):
             return expectancy
         
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
-        max_depth = env.num_steps
+        # max_depth = env.num_steps
         depth = 1
         start_time = time.time()
         operation = 'park'
-        while  (depth <= max_depth):
+        while  (True):
             try:
-                # we perform the MAX action on the children heuristics here therefore, we call the function with MIN argument
+                # we perform the MAX action on the children heuristics here therefore, we call the function with EXP argument
                 operators = env.get_legal_operators(agent_id)
                 children = [env.clone() for _ in operators]
                 for child, op in zip(children, operators):
                     child.apply_operator(agent_id, op)
-                heuristics = [  self.compute_next_operation(child, agent_id, (time_limit - (time.time() - start_time)), AgentTurn.MIN, depth )
+                heuristics = [  self.compute_next_operation(child, agent_id, (time_limit - (time.time() - start_time)), AgentTurn.EXP, depth )
                                 for child in children   ]
                 operation = operators[ heuristics.index( max(heuristics) ) ]
-                heuristics.clear()
                 depth += 1
             except TimeoutError: # ran out of time
                 return operation

@@ -3,49 +3,49 @@ import shutil
 import csv
 import random
 # format: ((agent_0, agent_1), simulations_num)
-agents = [] # for every possible agent
-for agent_0 in ["random", "greedy", "greedyImproved", "minimax", "alphabeta", "expectimax"]:
-    for agent_1 in ["random", "greedy", "greedyImproved", "minimax", "alphabeta", "expectimax"]:
-        agents.append(((agent_0, agent_1), 10))
+# agents = [] # for every possible agent
+# for agent_0 in ["random", "greedy", "greedyImproved", "minimax", "alphabeta", "expectimax"]:
+#     for agent_1 in ["random", "greedy", "greedyImproved", "minimax", "alphabeta", "expectimax"]:
+#         agents.append(((agent_0, agent_1), 10))
 # for the agents we implemented
-# agents = [ 
-#         # (('random', 'random'), 10),
-#         # (('random', 'greedy'), 10),
-#         # (('random', 'greedyImproved'), 10),
-#         # (('random', 'minimax'), 10),
-#         # (('random', 'alphabeta'), 10),
-#         # (('random', 'expectimax'), 10),
-#         # (('greedy', 'random'), 10),
-#         # (('greedy', 'greedy'), 10),
-#         # (('greedy', 'greedyImproved'), 10),
-#         # (('greedy', 'minimax'), 10),
-#         # (('greedy', 'alphabeta'), 10),
-#         # (('greedy', 'expectimax'), 10),
-#         # (('greedyImproved', 'random'), 10),
-#         # (('greedyImproved', 'greedy'), 10),
-#         (('greedyImproved', 'greedyImproved'), 10),
-#         (('greedyImproved', 'minimax'), 10),
-#         (('greedyImproved', 'alphabeta'), 10),
-#         (('greedyImproved', 'expectimax'), 10),
-#         # (('minimax', 'random'), 10),
-#         # (('minimax', 'greedy'), 10),
-#         (('minimax', 'greedyImproved'), 10),
-#         (('minimax', 'minimax'), 10),
-#         (('minimax', 'alphabeta'), 10),
-#         (('minimax', 'expectimax'), 10),
-#         # (('alphabeta', 'random'), 10),
-#         # (('alphabeta', 'greedy'), 10),
-#         (('alphabeta', 'greedyImproved'), 10),
-#         (('alphabeta', 'minimax'), 10),
-#         (('alphabeta', 'alphabeta'), 10),
-#         (('alphabeta', 'expectimax'), 10),
-#         # (('expectimax', 'random'), 10),
-#         # (('expectimax', 'greedy'), 10),
-#         (('expectimax', 'greedyImproved'), 10),
-#         (('expectimax', 'minimax'), 10),
-#         (('expectimax', 'alphabeta'), 10),
-#         (('expectimax', 'expectimax'), 10),   
-#     ]
+agents = [ 
+        # (('random', 'random'), 6),
+        # (('random', 'greedy'), 6),
+        # (('random', 'greedyImproved'), 6),
+        # (('random', 'minimax'), 6),
+        # (('random', 'alphabeta'), 6),
+        # (('random', 'expectimax'), 6),
+        # (('greedy', 'random'), 6),
+        # (('greedy', 'greedy'), 6),
+        # (('greedy', 'greedyImproved'), 6),
+        # (('greedy', 'minimax'), 6),
+        # (('greedy', 'alphabeta'), 6),
+        # (('greedy', 'expectimax'), 6),
+        # (('greedyImproved', 'random'), 6),
+        # (('greedyImproved', 'greedy'), 6),
+        (('greedyImproved', 'greedyImproved'), 6),
+        (('greedyImproved', 'minimax'), 6),
+        (('greedyImproved', 'alphabeta'), 6),
+        (('greedyImproved', 'expectimax'), 6),
+        # (('minimax', 'random'), 6),
+        # (('minimax', 'greedy'), 6),
+        (('minimax', 'greedyImproved'), 6),
+        (('minimax', 'minimax'), 6),
+        (('minimax', 'alphabeta'), 6),
+        (('minimax', 'expectimax'), 6),
+        # (('alphabeta', 'random'), 6),
+        # (('alphabeta', 'greedy'), 6),
+        (('alphabeta', 'greedyImproved'), 6),
+        (('alphabeta', 'minimax'), 6),
+        (('alphabeta', 'alphabeta'), 6),
+        (('alphabeta', 'expectimax'), 6),
+        # (('expectimax', 'random'), 6),
+        # (('expectimax', 'greedy'), 6),
+        (('expectimax', 'greedyImproved'), 6),
+        (('expectimax', 'minimax'), 6),
+        (('expectimax', 'alphabeta'), 6),
+        (('expectimax', 'expectimax'), 6),   
+    ]
 
 
 def simulations():
@@ -85,6 +85,8 @@ def simulations():
                 # exit_val = os.system("python main.py " + agent_0 + " " + agent_1 + " -t 1 -s 1234 -c 200 --console_print --screen_print") # to watch the match
                 seed = random.randint(0,1234)
                 steps_num = random.randint(50,500)
+                # seed = 1234
+                # steps_num = 200
                 seed_arg = " -s " + str(seed)
                 step_num_arg = " -c " + str(steps_num)
                 cmd = "python ./main.py " + agent_0 + " " + agent_1 + " -t 1" + seed_arg + step_num_arg

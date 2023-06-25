@@ -1,0 +1,17 @@
+Agent_0:,Agent_1:,Number Of Simulations:,Agent_0 wins:,Agent_1 wins:,Draws:,Errors,Student:
+greedyImproved,greedyImproved,6,3,3,0,0,saleh
+greedyImproved,minimax,6,4,1,1,0,saleh
+greedyImproved,alphabeta,6,6,0,0,0,saleh
+greedyImproved,expectimax,6,3,3,0,0,saleh
+minimax,greedyImproved,6,0,6,0,0,saleh
+minimax,minimax,6,2,2,2,0,saleh
+minimax,alphabeta,6,0,0,6,0,saleh
+minimax,expectimax,6,0,6,0,0,saleh
+alphabeta,greedyImproved,6,0,6,0,0,saleh
+alphabeta,minimax,6,1,1,4,0,saleh
+alphabeta,alphabeta,6,2,0,4,0,saleh
+alphabeta,expectimax,6,0,6,0,0,saleh
+expectimax,greedyImproved,6,3,3,0,0,saleh
+expectimax,minimax,6,4,1,1,0,saleh
+expectimax,alphabeta,6,6,0,0,0,saleh
+expectimax,expectimax,6,0,3,3,0,saleh

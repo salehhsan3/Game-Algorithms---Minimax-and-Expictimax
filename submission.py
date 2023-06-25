@@ -25,8 +25,8 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
     else:  # agent carries a package
         dist = manhattan_distance(agent.position, agent.package.destination)
 
-    if agent.battery <= dist:        # once all you can do is get to a charging station, go charge..
-        return (-1) * (agent.credit + closest_station)
+    # if agent.battery <= dist:        # once all you can do is get to a charging station, go charge..
+    #     return (-1) * (agent.credit + closest_station)
 
     return (100 * (agent.package is not None)) + (100 * agent.credit) - dist
 
@@ -37,7 +37,7 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
 def game_done_utility(env: WarehouseEnv, robot_id: int):
         agent = env.get_robot(robot_id)
         adversary = env.get_robot((robot_id+1)%2)
-        return agent.credit - adversary.credit
+        return (agent.credit - adversary.credit)
     
 class AgentGreedyImproved(AgentGreedy):
     def heuristic(self, env: WarehouseEnv, robot_id: int):
@@ -49,7 +49,7 @@ class AgentMinimax(Agent):
         if env.done():
             return game_done_utility(env,robot_id)
         else:
-            return smart_heuristic(env,robot_id) - smart_heuristic(env, (robot_id+1)%2)
+            return smart_heuristic(env,robot_id) - smart_heuristic(env,(robot_id+1)%2)
 
     def compute_next_operation(self, env: WarehouseEnv, agent_id, time_left, turn: AgentTurn, depth):
         start_time = time.time()
@@ -82,20 +82,18 @@ class AgentMinimax(Agent):
     
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
         start_time = time.time()
-        max_depth = env.num_steps
         depth = 1
         operation = 'park'
-        while (depth <= max_depth) :
+        while (True) :
             try:
                 # we perform the MAX action on the children heuristics here therefore, we call the function with MIN argument
                 operators = env.get_legal_operators(agent_id)
                 children = [env.clone() for _ in operators]
                 for child, op in zip(children, operators):
                     child.apply_operator(agent_id, op)
-                heuristics = [  self.compute_next_operation(child,agent_id, (time_limit - (time.time() - start_time)), AgentTurn.MIN, depth)
+                heuristics = [  self.compute_next_operation(child, agent_id, (time_limit - (time.time() - start_time)), AgentTurn.MIN, depth)
                                 for child in children   ]
-                operation = operators[ heuristics.index( max(heuristics) ) ]
-                # heuristics.clear()
+                operation = operators[random.choice([i for i,h in enumerate(heuristics) if h == max(heuristics)])] # less of a chance to pick a bad move when there are better ones
                 depth += 1
             except TimeoutError: # ran out of time
                 return operation
@@ -108,7 +106,7 @@ class AgentAlphaBeta(Agent):
         if env.done():
             return game_done_utility(env,robot_id)
         else:
-            return smart_heuristic(env,robot_id) - smart_heuristic(env, (robot_id+1)%2)
+            return smart_heuristic(env,robot_id) - smart_heuristic(env,(robot_id+1)%2)
     
     def compute_next_operation( self, env:WarehouseEnv, agent_id, time_left, turn:AgentTurn, depth, alpha, beta):
         start_time = time.time()
@@ -150,11 +148,10 @@ class AgentAlphaBeta(Agent):
             return curr_min
     
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
-        max_depth = env.num_steps
         depth = 1
         start_time = time.time()
         operation = 'park'
-        while  (depth <= max_depth):
+        while  (True):
             try:
                 # we perform the MAX action on the children heuristics here therefore, we call the function with MIN argument
                 operators = env.get_legal_operators(agent_id)
@@ -163,8 +160,7 @@ class AgentAlphaBeta(Agent):
                     child.apply_operator(agent_id, op)
                 heuristics = [  self.compute_next_operation(child, agent_id, (time_limit - (time.time() - start_time)), AgentTurn.MIN, depth, alpha=(-(np.inf)), beta=(np.inf) )
                                 for child in children   ]
-                operation = operators[ heuristics.index( max(heuristics) ) ]
-                # heuristics.clear()
+                operation = operators[random.choice([i for i,h in enumerate(heuristics) if h == max(heuristics)])] # less of a chance to pick a bad move when there are better ones
                 depth += 1
             except TimeoutError: # ran out of time
                 return operation
@@ -177,7 +173,7 @@ class AgentExpectimax(Agent):
         if env.done():
             return game_done_utility(env, robot_id)
         else:
-            return smart_heuristic(env,robot_id) - smart_heuristic(env, (robot_id+1)%2)
+            return smart_heuristic(env,robot_id) - smart_heuristic(env,(robot_id+1)%2)
     
     def compute_next_operation( self, env:WarehouseEnv, agent_id, time_left, turn:AgentTurn, depth):
         start_time = time.time()
@@ -215,11 +211,10 @@ class AgentExpectimax(Agent):
             return expectancy
         
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
-        max_depth = env.num_steps
         depth = 1
         start_time = time.time()
         operation = 'park'
-        while  (depth <= max_depth):
+        while  (True):
             try:
                 # we perform the MAX action on the children heuristics here therefore, we call the function with EXP argument
                 operators = env.get_legal_operators(agent_id)
@@ -228,8 +223,7 @@ class AgentExpectimax(Agent):
                     child.apply_operator(agent_id, op)
                 heuristics = [  self.compute_next_operation(child, agent_id, (time_limit - (time.time() - start_time)), AgentTurn.EXP, depth )
                                 for child in children   ]
-                operation = operators[ heuristics.index( max(heuristics) ) ]
-                # heuristics.clear()
+                operation = operators[random.choice([i for i,h in enumerate(heuristics) if h == max(heuristics)])] # less of a chance to pick a bad move when there are better ones
                 depth += 1
             except TimeoutError: # ran out of time
                 return operation

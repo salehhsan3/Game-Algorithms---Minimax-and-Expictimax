@@ -11,10 +11,10 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true
-            // "args": ["minimax", "minimax", "-t", "1",
-            //          "-s", "1234", "-c", "1000", "--console_print", "--screen_print"],
-            "args": ["expectimax", "expectimax", "-t", "1",
-                     "-s", "255", "-c", "1000"],
+            "args": ["minimax", "greedyImproved", "-t", "1",
+                     "-s", "135", "-c", "1000", "--console_print", "--screen_print"],
+            // "args": ["expectimax", "expectimax", "-t", "100",
+            //          "-s", "255", "-c", "1000"],
             "purpose": ["debug-in-terminal"]
         }
     ]
